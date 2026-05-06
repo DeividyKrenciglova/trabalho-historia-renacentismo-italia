@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação: O Renascimento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Kalam:wght@400;700&family=Open+Sans:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --comic-border: #000;
+            --mestre-bubble: #fffbe6;
+            --pietro-bubble: #e6f7ff;
+            --accent-yellow: #ffd700;
+            --paper-color: #fdf6e3;
+        }
+
+        body {
+            background-color: #121212;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Kalam', cursive;
+            overflow: hidden;
+        }
+
+        /* Container Principal */
+        .presentation-container {
+            width: 95vw;
+            max-width: 1100px;
+            height: 650px;
+            position: relative;
+            background: #222;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 4px solid #444;
+            border-radius: 10px;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border: 8px solid var(--comic-border);
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Elementos da HQ */
+        .panel-tag {
+            background: var(--accent-yellow);
+            border-bottom: 5px solid #000;
+            padding: 12px 25px;
+            font-family: 'Bangers', cursive;
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 10;
+        }
+
+        .visual-area {
+            flex-grow: 1;
+            position: relative;
+            background: var(--paper-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .scenery {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.2;
+            z-index: 1;
+            object-fit: cover;
+        }
+
+        /* Personagens SVG */
+        .char-svg {
+            position: absolute;
+            bottom: 0;
+            height: 320px;
+            filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.15));
+            z-index: 5;
+        }
+
+        .mestre-pos { left: 5%; }
+        .pietro-pos { right: 5%; }
+
+        /* Balões de Fala */
+        .speech-bubble {
+            position: absolute;
+            border: 4px solid #000;
+            padding: 15px 20px;
+            max-width: 280px;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.2;
+            border-radius: 20px;
+            z-index: 20;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            border-width: 20px 20px 0 0;
+            border-style: solid;
+            z-index: 21;
+        }
+
+        .b-mestre { background: var(--mestre-bubble); }
+        .b-mestre::after { border-color: #000 transparent; left: 20px; }
+
+        .b-pietro { background: var(--pietro-bubble); }
+        .b-pietro::after { border-color: #000 transparent; right: 20px; left: auto; transform: scaleX(-1); }
+
+        /* Caixa Acadêmica (Para explicar o trabalho) */
+        .caption {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #000;
+            color: #fff;
+            padding: 15px 25px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 15px;
+            z-index: 30;
+            box-sizing: border-box;
+            border-top: 4px solid var(--accent-yellow);
+        }
+
+        .caption b { color: var(--accent-yellow); font-size: 17px; text-transform: uppercase; }
+
+        /* Controles */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 35px;
+            font-family: 'Bangers', cursive;
+            font-size: 26px;
+            background: var(--accent-yellow);
+            border: 4px solid #000;
+            cursor: pointer;
+            box-shadow: 5px 5px 0 #000;
+            transition: 0.1s;
+            border-radius: 8px;
+        }
+
+        button:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; }
+        button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+        button:disabled { background: #666; color: #aaa; cursor: not-allowed; transform: none; box-shadow: none; border-color: #444; }
+        
+        .progress { color: white; font-family: 'Open Sans'; font-weight: bold; font-size: 18px; }
+
+        /* SVGs Genéricos Reutilizáveis */
+        .svg-mestre {
+            fill: #5d4037; stroke: black; stroke-width: 2;
+        }
+
+        /* --- CONFIGURAÇÕES PARA EXPORTAÇÃO PDF --- */
+        @media print {
+            @page { size: landscape; margin: 0; }
+            body { 
+                background: white; margin: 0; padding: 0; height: auto; display: block; 
+            }
+            .presentation-container {
+                width: 100%; max-width: none; height: auto; box-shadow: none; border: none; display: block;
+            }
+            .slide {
+                display: flex !important; position: relative !important; width: 100vw; height: 100vh;
+                page-break-after: always; break-after: page; border: 8px solid #000; border-radius: 0;
+                box-shadow: none; animation: none !important; opacity: 1 !important; transform: none !important;
+            }
+            .controls { display: none !important; }
+            
+            /* Força os navegadores a imprimirem as cores de fundo e imagens */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+
+        <!-- SLIDE 1: CAPA -->
+        <div class="slide active" style="background: linear-gradient(135deg, #e74c3c, #c0392b); justify-content: center; align-items: center;">
+            <div style="background: white; padding: 50px; border: 8px solid black; transform: rotate(-2deg); box-shadow: 15px 15px 0 #000; text-align: center;">
+                <h1 style="font-family: 'Bangers'; font-size: 80px; margin: 0; line-height: 1;">A LUZ DA RAZÃO</h1>
+                <div style="background: #000; color: #fff; padding: 10px; font-size: 26px; margin: 15px 0;">O Renascimento em Itália</div>
+                <p style="font-family: 'Open Sans'; font-weight: 800; color: #444; letter-spacing: 2px;">UM TRABALHO DE HISTÓRIA</p>
+                <p style="font-family: 'Kalam'; font-size: 20px; margin-top: 30px; color: #e74c3c;">(Use as setas ⬅ ➡ para navegar)</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: HUMANISMO -->
+        <div class="slide">
+            <div class="panel-tag">1. O Homem no Centro (Humanismo)</div>
+            <div class="visual-area">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Da_Vinci_Vitruve_Luc_Viatour.jpg/800px-Da_Vinci_Vitruve_Luc_Viatour.jpg" class="scenery">
+                
+                <!-- Mestre Dante -->
+                <svg class="char-svg mestre-pos" viewBox="0 0 100 150">
+                    <path d="M30,150 L70,150 L65,50 L35,50 Z" class="svg-mestre"/>
+                    <circle cx="50" cy="30" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,35 Q50,75 65,35" fill="white" stroke="black" stroke-width="1"/>
+                </svg>
+
+                <!-- Pietro -->
+                <svg class="char-svg pietro-pos" viewBox="0 0 100 150" style="height: 280px;">
+                    <path d="M30,150 L70,150 L68,60 L32,60 Z" fill="#2980b9" stroke="black" stroke-width="2"/>
+                    <circle cx="50" cy="45" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,40 Q50,25 65,40" fill="#3e2723" stroke="black" stroke-width="2"/>
+                </svg>
+
+                <div class="speech-bubble b-mestre" style="top: 40px; left: 18%;">"Pietro, olha o Homem Vitruviano de Da Vinci! O Homem não é apenas um pecador, é uma obra-prima matemática."</div>
+                <div class="speech-bubble b-pietro" style="top: 140px; right: 18%;">"Quer dizer que a beleza pode ser estudada pela razão? Isso é o Antropocentrismo!"</div>
+                
+                <div class="caption"><b>Humanismo e Antropocentrismo:</b> Mudança do foco medieval (Deus no centro - Teocentrismo) para a valorização do ser humano, da razão e do seu potencial criador.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: LITERATURA (NOVO) -->
+        <div class="slide">
+            <div class="panel-tag">2. A Palavra Escrita (Literatura)</div>
+            <div class="visual-area">
+                <!-- Dante Alighieri SVG Simulado -->
+                <svg class="char-svg" viewBox="0 0 100 150" style="left: 40%; height: 350px;">
+                    <path d="M25,150 L75,150 L65,40 L35,40 Z" fill="#c0392b" stroke="black" stroke-width="2"/>
+                    <circle cx="50" cy="30" r="14" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M30,15 Q50,5 70,15 Q50,25 30,15 Z" fill="#27ae60" stroke="black" stroke-width="1"/> <!-- Coroa de Louros -->
+                    <path d="M45,30 L55,30" stroke="black" stroke-width="2"/>
+                </svg>
+
+                <div class="speech-bubble b-mestre" style="top: 30px; left: 5%;">"A revolução começou nas palavras! Dante Alighieri escreveu 'A Divina Comédia' em italiano, não em latim!"</div>
+                <div class="speech-bubble b-pietro" style="top: 120px; right: 5%;">"Escrever na língua do povo? Isso significa que o conhecimento já não é apenas para o clero!"</div>
+                
+                <div class="caption"><b>Literatura Renascentista:</b> Autores como Dante, Petrarca e Boccaccio começaram a usar as línguas vernáculas (locais), popularizando a literatura e resgatando textos clássicos.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: ARQUITETURA -->
+        <div class="slide">
+            <div class="panel-tag">3. Tocando o Céu com Cálculo (Arquitetura)</div>
+            <div class="visual-area">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Florence_Duomo_from_Michelangelo_Hill.jpg/800px-Florence_Duomo_from_Michelangelo_Hill.jpg" class="scenery" style="opacity: 0.3;">
+                
+                <svg class="char-svg mestre-pos" viewBox="0 0 100 150">
+                    <path d="M30,150 L70,150 L65,50 L35,50 Z" class="svg-mestre"/>
+                    <circle cx="50" cy="30" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,35 Q50,75 65,35" fill="white" stroke="black" stroke-width="1"/>
+                </svg>
+
+                <div class="speech-bubble b-mestre" style="top: 30px; left: 18%; max-width: 350px;">"Observa a cúpula do Duomo de Florença. Brunelleschi construiu-a sem suportes de madeira, usando pura engenharia romana e física!"</div>
+                
+                <div class="caption"><b>Racionalismo na Arquitetura:</b> Abandono do estilo gótico medieval. A arquitetura passa a usar a simetria, a proporção e a cúpula, inspiradas em Roma e na Grécia.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: ANATOMIA E CIÊNCIA (NOVO) -->
+        <div class="slide">
+            <div class="panel-tag">4. O Mistério do Corpo (Ciência)</div>
+            <div class="visual-area" style="background: #2c3e50;">
+                <svg class="char-svg mestre-pos" viewBox="0 0 100 150">
+                    <path d="M30,150 L70,150 L65,50 L35,50 Z" class="svg-mestre"/>
+                    <circle cx="50" cy="30" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,35 Q50,75 65,35" fill="white" stroke="black" stroke-width="1"/>
+                </svg>
+
+                <svg class="char-svg pietro-pos" viewBox="0 0 100 150" style="height: 280px;">
+                    <path d="M30,150 L70,150 L68,60 L32,60 Z" fill="#2980b9" stroke="black" stroke-width="2"/>
+                    <circle cx="50" cy="45" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,40 Q50,25 65,40" fill="#3e2723" stroke="black" stroke-width="2"/>
+                </svg>
+
+                <div class="speech-bubble b-pietro" style="top: 40px; right: 18%;">"Mestre, é verdade que Da Vinci e Vesálio dissecavam cadáveres às escondidas?"</div>
+                <div class="speech-bubble b-mestre" style="top: 140px; left: 18%;">"Sim! A Igreja proibia, mas para pintar a vida e curar os doentes, eles precisavam entender o funcionamento real dos músculos e dos ossos."</div>
+                
+                <div class="caption"><b>Cientificismo e Naturalismo:</b> A busca empírica pela verdade. A observação direta da natureza e o estudo rigoroso da anatomia revolucionaram a medicina e a arte.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: MECENATO -->
+        <div class="slide">
+            <div class="panel-tag">5. Quem Paga a Conta? (O Mecenato)</div>
+            <div class="visual-area">
+                <svg class="char-svg" viewBox="0 0 100 150" style="left: 40%; height: 380px;">
+                    <path d="M20,150 L80,150 L75,40 L25,40 Z" fill="#c0392b" stroke="black" stroke-width="2"/>
+                    <circle cx="50" cy="25" r="16" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,10 L65,10" stroke="gold" stroke-width="6"/> <!-- Coroa rica -->
+                    <path d="M40,25 L60,25" stroke="black" stroke-width="3"/>
+                </svg>
+
+                <div class="speech-bubble b-pietro" style="top: 30px; left: 5%;">"Se a arte era tão grandiosa, quem comprava as tintas caras e o mármore?"</div>
+                <div class="speech-bubble b-mestre" style="top: 100px; right: 5%;">"Os Mecenas! Homens como Lorenzo de Médici ou os Papas em Roma. Eles financiavam os artistas para demonstrar poder e status social."</div>
+                
+                <div class="caption"><b>O Mecenato:</b> O patrocínio de artistas, intelectuais e cientistas pela burguesia rica e pelo clero, funcionando como uma ferramenta de propaganda política.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: A PERSPECTIVA -->
+        <div class="slide">
+            <div class="panel-tag">6. A Matemática da Beleza (Perspectiva)</div>
+            <div class="visual-area">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Rafael_-_Escola_de_Atenas.jpg/1024px-Rafael_-_Escola_de_Atenas.jpg" class="scenery" style="opacity: 0.4;">
+                
+                <svg class="char-svg pietro-pos" viewBox="0 0 100 150" style="height: 280px;">
+                    <path d="M30,150 L70,150 L68,60 L32,60 Z" fill="#2980b9" stroke="black" stroke-width="2"/>
+                    <circle cx="50" cy="45" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,40 Q50,25 65,40" fill="#3e2723" stroke="black" stroke-width="2"/>
+                </svg>
+
+                <div class="speech-bubble b-pietro" style="top: 30px; left: 10%; max-width: 400px;">"Ao olhar para este quadro de Rafael Sanzio, parece que posso entrar na pintura! As linhas fogem todas para um ponto lá no fundo!"</div>
+                
+                <div class="caption"><b>Técnicas Renascentistas (Perspectiva e Classicismo):</b> Criação da ilusão de tridimensionalidade em superfícies planas usando geometria. A "Escola de Atenas" também simboliza o resgate de filósofos gregos (Classicismo).</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: POLÍTICA -->
+        <div class="slide">
+            <div class="panel-tag">7. Política sem Ilusões</div>
+            <div class="visual-area" style="background: #e1e8ed;">
+                <svg class="char-svg mestre-pos" viewBox="0 0 100 150">
+                    <path d="M30,150 L70,150 L65,50 L35,50 Z" class="svg-mestre"/>
+                    <circle cx="50" cy="30" r="15" fill="#ffe0bd" stroke="black" stroke-width="2"/>
+                    <path d="M35,35 Q50,75 65,35" fill="white" stroke="black" stroke-width="1"/>
+                </svg>
+
+                <div class="speech-bubble b-mestre" style="top: 50px; left: 18%; max-width: 450px;">"Enquanto Rafael pintava, Nicolau Maquiavel escrevia 'O Príncipe'. Ele separou a política da religião. Defendeu que o governante deve focar-se na realidade do poder, e não na bondade cristã!"</div>
+                
+                <div class="caption"><b>Ciência Política:</b> Maquiavel funda a teoria política moderna com uma abordagem realista: os fins justificam os meios na manutenção do Estado.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: CONCLUSÃO -->
+        <div class="slide">
+            <div class="panel-tag">8. O Legado Imortal</div>
+            <div class="visual-area" style="background: #000; justify-content: center; align-items: center; text-align: center; flex-direction: column;">
+                <h2 style="font-family: 'Bangers'; font-size: 55px; color: var(--accent-yellow); margin: 0;">FIM DA IDADE DAS TREVAS</h2>
+                <p style="font-family: 'Open Sans'; color: #fff; font-size: 20px; max-width: 800px; line-height: 1.5; margin: 20px 0;">
+                    O Renascimento não foi apenas fazer "arte bonita". Foi uma profunda transformação na forma como o ser humano se via a si mesmo e ao Universo. Com o Humanismo, a Ciência, e o resgate da Antiguidade, plantaram-se as sementes do nosso mundo moderno.
+                </p>
+                <div class="speech-bubble b-mestre" style="position: relative; margin-top: 30px;">"E assim, Pietro, a curiosidade venceu o medo. Lembra-te disto no teu trabalho escolar!"</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NAVEGAÇÃO -->
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>⬅ Anterior</button>
+        <span class="progress" id="progressText">Slide 1 de 9</span>
+        <button id="nextBtn" onclick="changeSlide(1)">Próximo ➡</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressText = document.getElementById('progressText');
+
+        function updateUI() {
+            // Oculta todos, mostra o atual
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Atualiza botões
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+
+            // Atualiza texto
+            progressText.innerText = `Slide ${currentSlide + 1} de ${slides.length}`;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+            updateUI();
+        }
+
+        // Adiciona suporte às Setas do Teclado para a apresentação
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "ArrowRight") {
+                if (currentSlide < slides.length - 1) changeSlide(1);
+            } else if (event.key === "ArrowLeft") {
+                if (currentSlide > 0) changeSlide(-1);
+            }
+        });
+
+        // Inicializa
+        updateUI();
+    </script>
+</body>
+</html>
