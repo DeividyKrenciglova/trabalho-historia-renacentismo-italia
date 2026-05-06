@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Aprendiz de Florença - HQ Renascentista</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#f4ecd8',
+                        wine: '#800020',
+                        gold: '#d4af37'
+                    },
+                    fontFamily: {
+                        renaissance: ['Cinzel', 'serif'],
+                        comic: ['Comic Neue', 'cursive'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Comic+Neue:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4ecd8; overflow: hidden; color: #2d2d2d; transition: background-color 0.5s, color 0.5s; }
+        
+        /* Slider Layout */
+        .slider-container { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); height: 100vh; width: 100vw; }
+        .slide { min-width: 100vw; height: 100vh; padding: 5rem 1.5rem; display: flex; flex-direction: column; position: relative; overflow-y: auto; overflow-x: hidden; }
+        .slide-content { width: 100%; max-width: 1200px; margin: auto; z-index: 10; }
+        
+        /* Comic Elements */
+        .comic-panel { border: 4px solid #2d2d2d; background-color: #fffaf0; box-shadow: 8px 8px 0px #2d2d2d; padding: 1.5rem; position: relative; transition: transform 0.3s, box-shadow 0.3s, background-color 0.5s, border-color 0.5s; }
+        .comic-panel:hover { transform: translateY(-5px); box-shadow: 12px 12px 0px #2d2d2d; }
+        
+        .speech-bubble { position: relative; background: #fff; border: 3px solid #2d2d2d; border-radius: 20px; padding: 1rem; box-shadow: 4px 4px 0 #2d2d2d; font-family: 'Comic Neue', cursive; font-weight: bold; transition: background-color 0.5s, border-color 0.5s, color 0.5s; }
+        .speech-bubble::after { content: ''; position: absolute; bottom: -15px; left: 20px; border-width: 15px 15px 0; border-style: solid; border-color: #2d2d2d transparent; display: block; width: 0; transition: border-color 0.5s; }
+        .speech-bubble::before { content: ''; position: absolute; bottom: -10px; left: 23px; border-width: 12px 12px 0; border-style: solid; border-color: #fff transparent; display: block; width: 0; z-index: 1; transition: border-color 0.5s; }
+        
+        /* Variant for right-pointing tail */
+        .speech-bubble.right-tail::after { left: auto; right: 20px; }
+        .speech-bubble.right-tail::before { left: auto; right: 23px; }
+
+        .narration-box { background: #ffebcd; border: 3px solid #2d2d2d; padding: 1rem; box-shadow: 4px 4px 0 #2d2d2d; font-family: 'Inter', sans-serif; font-style: italic; border-top-width: 15px; border-top-color: #800020; transition: background-color 0.5s, border-color 0.5s, color 0.5s; }
+        
+        .comic-caption { background: #eab308; color: #2d2d2d; padding: 0.25rem 0.75rem; border: 2px solid #2d2d2d; font-weight: bold; position: absolute; top: -15px; left: 15px; transform: rotate(-2deg); font-family: 'Comic Neue', cursive; z-index: 20; }
+        
+        /* Background Pattern */
+        .halftone-bg {
+            background-image: radial-gradient(#d4af37 20%, transparent 20%), radial-gradient(#d4af37 20%, transparent 20%);
+            background-color: #f4ecd8;
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+            opacity: 0.1;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            transition: background-color 0.5s, opacity 0.5s;
+        }
+
+        /* Image Placeholders */
+        .img-placeholder {
+            background: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 10px, #d1d5db 10px, #d1d5db 20px);
+            border: 2px solid #2d2d2d;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Comic Neue', cursive; color: #6b7280; font-weight: bold; font-size: 1.25rem; text-align: center;
+            transition: border-color 0.5s, background 0.5s;
+        }
+
+        /* Dark Mode Overrides */
+        .dark body { background-color: #1a1a1a; color: #e0e0e0; }
+        .dark .halftone-bg { background-color: #1a1a1a; background-image: radial-gradient(#ffffff 20%, transparent 20%), radial-gradient(#ffffff 20%, transparent 20%); opacity: 0.04; }
+        .dark .comic-panel { background-color: #2a2a2a; border-color: #f4ecd8; box-shadow: 8px 8px 0px #f4ecd8; color: #e0e0e0; }
+        .dark .comic-panel:hover { box-shadow: 12px 12px 0px #f4ecd8; }
+        .dark .speech-bubble { background: #3d3d3d; border-color: #f4ecd8; box-shadow: 4px 4px 0 #f4ecd8; color: #f4ecd8; }
+        .dark .speech-bubble::after { border-color: #f4ecd8 transparent; }
+        .dark .speech-bubble::before { border-color: #3d3d3d transparent; }
+        .dark .narration-box { background: #4a3b32; border-color: #f4ecd8; box-shadow: 4px 4px 0 #f4ecd8; color: #f4ecd8; border-top-color: #d4af37; }
+        .dark .img-placeholder { background: repeating-linear-gradient(45deg, #374151, #374151 10px, #4b5563 10px, #4b5563 20px); border-color: #f4ecd8; color: #9ca3af; }
+        .dark .comic-caption { border-color: #f4ecd8; }
+        
+        /* Animations */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4af37; border: 2px solid #2d2d2d; border-radius: 5px; }
+        .dark ::-webkit-scrollbar-thumb { border-color: #f4ecd8; }
+
+    </style>
+</head>
+<body class="transition-colors duration-500">
+
+    <div class="halftone-bg"></div>
+
+    <!-- UI Controls -->
+    <div class="fixed top-4 right-4 z-50 flex gap-4">
+        <button id="darkModeToggle" class="p-3 rounded-full border-4 border-gray-900 bg-white hover:bg-gray-200 transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:border-white dark:bg-gray-800 dark:hover:bg-gray-700 dark:shadow-[4px_4px_0px_rgba(255,255,255,1)] text-xl" aria-label="Alternar Modo Escuro" title="Alternar Modo Escuro">
+            🌙
+        </button>
+    </div>
+    
+    <div class="fixed bottom-4 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-8 pointer-events-none">
+        <button id="prevBtn" class="pointer-events-auto bg-white border-4 border-gray-900 text-gray-900 font-bold py-2 px-4 md:px-6 rounded hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none dark:bg-gray-800 dark:border-white dark:text-white dark:hover:shadow-[4px_4px_0px_rgba(255,255,255,1)] font-comic">
+            &#9664; ANTERIOR
+        </button>
+        
+        <div id="progressIndicator" class="bg-white border-4 border-gray-900 font-comic font-bold py-2 px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:bg-gray-800 dark:border-white dark:text-white dark:shadow-[4px_4px_0px_rgba(255,255,255,1)] transform rotate-1 text-sm md:text-base">
+            1 / 10
+        </div>
+        
+        <button id="nextBtn" class="pointer-events-auto bg-white border-4 border-gray-900 text-gray-900 font-bold py-2 px-4 md:px-6 rounded hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none dark:bg-gray-800 dark:border-white dark:text-white dark:hover:shadow-[4px_4px_0px_rgba(255,255,255,1)] font-comic">
+            PRÓXIMO &#9654;
+        </button>
+    </div>
+
+    <!-- Slides Container -->
+    <div id="slider" class="slider-container">
+    
+        <!-- Slide 1: Capa -->
+        <div class="slide">
+            <div class="slide-content flex flex-col items-center justify-center h-full text-center">
+                <div class="comic-panel max-w-4xl w-full p-8 md:p-16 transform -rotate-1 relative overflow-hidden fade-in">
+                    <div class="comic-caption text-xl md:text-2xl top-4 left-4 md:top-8 md:left-8 bg-purple-600 text-white border-white dark:border-gray-900 shadow-lg">SPIN-OFF HISTÓRICO #1</div>
+                    
+                    <h1 class="font-renaissance text-5xl md:text-7xl font-bold text-wine dark:text-red-400 mb-6 relative z-10 drop-shadow-md uppercase tracking-widest leading-tight mt-8">
+                        O Aprendiz<br>de Florença
+                    </h1>
+                    
+                    <div class="narration-box inline-block text-xl md:text-2xl transform rotate-2 mb-8 relative z-10 fade-in" style="animation-delay: 0.3s">
+                        Uma aventura nos ateliês do Renascimento!
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-2 mt-4 relative z-10 h-48 md:h-80 fade-in" style="animation-delay: 0.6s">
+                        <div class="img-placeholder h-full w-full border-4 border-gray-900" style="background-image: url('matteo_cover_1778066854760.png'); background-size: cover; background-position: center;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: O Sonho -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
+                <div class="flex flex-col gap-6">
+                    <div class="narration-box text-lg md:text-xl fade-in" style="animation-delay: 0.2s">
+                        <p>Florença, 1490. O jovem Matteo trabalha no escuro porão de um comerciante de tecidos, mas sua mente está além das paredes de pedra...</p>
+                    </div>
+                    <div class="comic-panel fade-in" style="animation-delay: 0.4s">
+                        <h2 class="font-renaissance text-3xl font-bold text-wine dark:text-red-400 mb-4">O Desejo de Criar</h2>
+                        <p class="text-lg leading-relaxed">Enquanto carrega pesados rolos de seda, Matteo rabisca figuras nos cantos de velhos pergaminhos. Ele sonha em pintar não apenas o que vê, mas a alma e a ciência das coisas.</p>
+                    </div>
+                </div>
+                <div class="relative h-64 md:h-96 comic-panel p-0 overflow-hidden fade-in" style="animation-delay: 0.6s">
+                    <div class="img-placeholder h-full w-full border-0" style="background-image: url('matteo_basement_1778066962357.png'); background-size: cover; background-position: center;"></div>
+                    <div class="speech-bubble absolute bottom-8 left-8 transform -rotate-3 max-w-xs text-sm md:text-base">
+                        *Suspiro* Deve haver mais na vida do que apenas contar moedas e medir veludo... A vida pulsa lá fora!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: O Chamado -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-12 gap-8 h-full items-center">
+                <div class="md:col-span-7 h-80 md:h-full min-h-[400px] relative comic-panel p-0 fade-in overflow-hidden">
+                    <div class="img-placeholder h-full w-full border-0" style="background-image: url('florence_square_1778067041075.png'); background-size: cover; background-position: center;"></div>
+                    <div class="speech-bubble absolute top-8 right-8 max-w-[250px] transform rotate-2 text-sm md:text-base font-bold text-red-700 dark:text-red-400">
+                        Atenção, cidadãos! O Magnífico Lorenzo de Medici convoca novos talentos para sua Academia! Quem provar seu valor será financiado!
+                    </div>
+                </div>
+                <div class="md:col-span-5 flex flex-col gap-6">
+                    <div class="narration-box text-lg fade-in" style="animation-delay: 0.3s">
+                        O arauto do poderoso mecenas de Florença faz um anúncio que mudará o destino de Matteo...
+                    </div>
+                    <div class="comic-panel bg-yellow-50 dark:bg-yellow-900/30 fade-in" style="animation-delay: 0.5s">
+                        <div class="speech-bubble right-tail text-sm md:text-base transform -rotate-1 mt-2">
+                            Esta é a minha chance! Mas eu não sei nada sobre as novas técnicas... Eu preciso descobrir o segredo dos grandes mestres!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: O Encontro com a Ciência -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
+                <div class="flex flex-col gap-6 order-2 md:order-1">
+                    <div class="narration-box text-lg md:text-xl fade-in" style="animation-delay: 0.2s">
+                        Determinado, Matteo invade silenciosamente o ateliê mais caótico e fascinante de Florença: o de Leonardo da Vinci.
+                    </div>
+                    <div class="comic-panel fade-in bg-stone-50 dark:bg-stone-800" style="animation-delay: 0.4s">
+                        <div class="speech-bubble right-tail text-sm mb-4 transform -rotate-2">
+                            Mestre Leonardo... Como você faz suas pinturas parecerem tão vivas?
+                        </div>
+                        <div class="speech-bubble text-sm transform rotate-1 mt-6 border-blue-500 text-blue-900 dark:text-blue-100 dark:bg-blue-900">
+                            Menino! A arte não nasce apenas do pincel. A natureza é a maior professora. Abra seus olhos para a ciência!
+                        </div>
+                    </div>
+                </div>
+                <div class="relative h-64 md:h-96 comic-panel p-0 overflow-hidden fade-in order-1 md:order-2" style="animation-delay: 0.6s">
+                    <div class="img-placeholder h-full w-full border-0" style="background-image: url('davinci_workshop_1778067055286.png'); background-size: cover; background-position: center;"></div>
+                    <div class="comic-caption bg-blue-500 text-white">ATELIÊ DE DA VINCI</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: A Lição de Anatomia -->
+        <div class="slide">
+            <div class="slide-content flex flex-col h-full justify-center">
+                <h2 class="font-renaissance text-3xl md:text-4xl text-center font-bold text-wine dark:text-red-400 mb-8 fade-in">A Primeira Lição: Racionalismo</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="comic-panel md:col-span-2 flex flex-col justify-center fade-in bg-white dark:bg-gray-800" style="animation-delay: 0.2s">
+                        <p class="text-lg mb-6">Leonardo abre um grande caderno de couro, repleto de desenhos intrincados de ossos, veias e músculos.</p>
+                        <div class="speech-bubble right-tail text-sm md:text-base border-blue-500 dark:bg-blue-900">
+                            Para pintar a pele de um homem, você deve entender a engrenagem que a move! O Humanismo exige que exploremos a máquina mais perfeita do universo: nós mesmos!
+                        </div>
+                    </div>
+                    <div class="comic-panel flex flex-col items-center fade-in bg-white dark:bg-gray-800" style="animation-delay: 0.4s">
+                        <div class="img-placeholder w-full h-48 mb-4 border-0" style="background-image: url('anatomy_lesson_1778067109199.png'); background-size: cover; background-position: center;"></div>
+                        <div class="speech-bubble text-xs transform rotate-2 font-comic">
+                            Incrível! Não é mágica... é matemática e biologia!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: O Gigante de Mármore -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-12 gap-8 h-full items-center">
+                <div class="md:col-span-5 comic-panel relative fade-in bg-stone-100 dark:bg-stone-800">
+                    <div class="comic-caption bg-orange-500 text-white z-20">PÁTIO DE ESCULTURAS</div>
+                    <div class="img-placeholder h-48 w-full mb-6 mt-2 border-0" style="background-image: url('michelangelo_sculpting_1778067448756.png'); background-size: cover; background-position: center;"></div>
+                    <div class="narration-box text-sm">
+                        Com a mente fervilhando, Matteo busca outro mestre. Ele encontra um homem irritadiço, golpeando furiosamente uma rocha gigante: Michelangelo.
+                    </div>
+                </div>
+                <div class="md:col-span-7 grid grid-cols-1 gap-4 h-full flex-grow fade-in" style="animation-delay: 0.4s">
+                    <div class="comic-panel p-6 flex flex-col justify-center relative bg-white dark:bg-gray-800">
+                        <div class="speech-bubble right-tail text-sm md:text-base mb-6 transform -rotate-1">
+                            Com licença, mestre. Como o senhor impõe emoção e forma a uma pedra tão fria e dura?
+                        </div>
+                        <div class="speech-bubble text-sm md:text-base mt-6 transform rotate-2 font-bold bg-orange-100 dark:bg-orange-900 border-orange-500">
+                            Eu não imponho nada, garoto tolo! A figura gloriosa já está lá dentro, viva! Meu trabalho é apenas quebrar o mármore desnecessário até libertá-la!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: O Segredo da Perspectiva -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
+                <div class="relative h-64 md:h-96 comic-panel p-0 overflow-hidden fade-in" style="animation-delay: 0.2s">
+                    <div class="img-placeholder h-full w-full bg-rose-50 dark:bg-rose-900 flex flex-col justify-center p-4 relative">
+                        <div class="absolute inset-0 border-[1px] border-black opacity-10 dark:opacity-30" style="background-image: linear-gradient(45deg, transparent 49%, black 50%, transparent 51%), linear-gradient(-45deg, transparent 49%, black 50%, transparent 51%); background-size: 50px 50px;"></div>
+                        <span class="text-6xl mb-4 relative z-10">🖌️ 📐</span>
+                        <span class="text-sm font-bold relative z-10">Rafael projetando um afresco</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-6">
+                    <div class="narration-box text-lg md:text-xl fade-in" style="animation-delay: 0.4s">
+                        Mais tarde, Matteo observa o jovem Rafael. Ele percebe linhas geométricas invisíveis sendo traçadas antes da tinta tocar a parede.
+                    </div>
+                    <div class="comic-panel fade-in bg-stone-50 dark:bg-stone-800" style="animation-delay: 0.6s">
+                        <div class="speech-bubble text-sm transform rotate-1 mb-4 border-rose-500 dark:bg-rose-900">
+                            Isso é a Perspectiva! Usamos um ponto de fuga para enganar os olhos. Transformamos uma parede plana numa janela infinita!
+                        </div>
+                        <div class="speech-bubble right-tail text-sm transform -rotate-2 mt-4">
+                            Profundidade matemática... Agora eu entendo todas as peças!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: O Julgamento do Mecenas -->
+        <div class="slide">
+            <div class="slide-content grid grid-cols-1 md:grid-cols-12 gap-8 h-full items-center">
+                <div class="md:col-span-6 flex flex-col gap-6">
+                    <div class="narration-box text-lg fade-in">
+                        O dia do concurso chegou. A corte de Lorenzo de Medici julga centenas de obras, impaciente.
+                    </div>
+                    <div class="comic-panel bg-yellow-50 dark:bg-yellow-900/30 fade-in" style="animation-delay: 0.3s">
+                        <p class="text-lg">Matteo nervosamente revela sua tela: Uma pintura do mercado de Florença, perfeitamente em perspectiva, com cidadãos de anatomia realista, banhados por uma luz com transições suaves (sfumato).</p>
+                    </div>
+                </div>
+                <div class="md:col-span-6 h-80 relative comic-panel p-0 fade-in overflow-hidden" style="animation-delay: 0.6s">
+                    <div class="img-placeholder h-full w-full flex flex-col bg-amber-100 dark:bg-amber-900/40 border-0">
+                        <span class="text-4xl md:text-6xl mb-4">👁️ 👑</span>
+                    </div>
+                    <div class="speech-bubble absolute top-6 right-6 max-w-[280px] transform rotate-2 text-sm md:text-base font-bold text-wine dark:text-red-200">
+                        Pelos deuses antigos! Quem fez isso? Há cálculo matemático, proporção exata e a mais pura emoção nesta tela!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: O Renascer de um Aprendiz -->
+        <div class="slide">
+            <div class="slide-content flex flex-col justify-center items-center h-full text-center">
+                <div class="comic-panel bg-gold dark:bg-yellow-700 p-8 md:p-12 max-w-4xl fade-in relative" style="animation-delay: 0.2s">
+                    <div class="comic-caption bg-wine text-white text-xl top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-0">A DECISÃO DE LORENZO</div>
+                    
+                    <div class="speech-bubble text-lg md:text-xl transform rotate-1 text-center font-bold mb-8">
+                        Jovem Matteo, você capturou a essência do nosso tempo! Você não é mais um carregador de tecidos. Você será patrocinado pela família Medici!
+                    </div>
+                    
+                    <div class="img-placeholder w-48 h-48 rounded-full mx-auto mb-6 bg-white dark:bg-gray-800">
+                        👦 🎨<br>Matteo chorando de alegria
+                    </div>
+                    
+                    <div class="speech-bubble right-tail text-base md:text-lg transform -rotate-2 border-blue-500">
+                        Os mestres me guiaram... Eu vou estudar a natureza, aplicar a razão e exaltar o ser humano!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Conclusão -->
+        <div class="slide">
+            <div class="slide-content flex flex-col justify-center items-center h-full text-center">
+                <div class="narration-box text-xl md:text-2xl mb-8 fade-in max-w-3xl transform rotate-1">
+                    E assim, nos bastidores da História...
+                </div>
+                
+                <div class="comic-panel bg-white dark:bg-gray-800 p-8 max-w-3xl fade-in relative border-[4px]" style="animation-delay: 0.4s">
+                    <p class="text-lg md:text-xl mb-4 font-inter">
+                        Grandes movimentos culturais não são feitos apenas pelos gênios famosos que lemos nos livros. O Renascimento floresceu graças ao desejo compartilhado por milhares de pessoas curiosas de aprender, questionar as trevas e enxergar o mundo sob uma luz brilhante.
+                    </p>
+                </div>
+                
+                <div class="speech-bubble text-3xl md:text-5xl mt-12 transform -rotate-2 fade-in font-bold text-center p-6 md:p-10 bg-wine text-white dark:bg-red-900 border-[6px] dark:border-white" style="animation-delay: 0.8s">
+                    FIM DA AVENTURA!<br>
+                    <span class="block text-lg md:text-2xl font-inter font-normal mt-4 text-gray-200">Qual será o seu próprio Renascimento?</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Controls -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const slider = document.getElementById("slider");
+            const slides = document.querySelectorAll(".slide");
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const progressIndicator = document.getElementById("progressIndicator");
+            const darkModeToggle = document.getElementById("darkModeToggle");
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            updateUI();
+
+            nextBtn.addEventListener("click", () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlider();
+                    playSlideSound();
+                }
+            });
+
+            prevBtn.addEventListener("click", () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlider();
+                    playSlideSound();
+                }
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowRight" || e.key === " ") {
+                    e.preventDefault();
+                    if (currentSlide < totalSlides - 1) {
+                        currentSlide++;
+                        updateSlider();
+                        playSlideSound();
+                    }
+                } else if (e.key === "ArrowLeft") {
+                    if (currentSlide > 0) {
+                        currentSlide--;
+                        updateSlider();
+                        playSlideSound();
+                    }
+                }
+            });
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            slider.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            slider.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const threshold = 75; 
+                if (touchStartX - touchEndX > threshold) {
+                    if (currentSlide < totalSlides - 1) {
+                        currentSlide++;
+                        updateSlider();
+                        playSlideSound();
+                    }
+                }
+                if (touchEndX - touchStartX > threshold) {
+                    if (currentSlide > 0) {
+                        currentSlide--;
+                        updateSlider();
+                        playSlideSound();
+                    }
+                }
+            }
+
+            function updateSlider() {
+                const translation = -(currentSlide * 100);
+                slider.style.transform = `translateX(${translation}vw)`;
+                updateUI();
+                triggerAnimations();
+            }
+
+            function updateUI() {
+                progressIndicator.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                if(currentSlide === 0) prevBtn.setAttribute("disabled", "true");
+                else prevBtn.removeAttribute("disabled");
+
+                if(currentSlide === totalSlides - 1) nextBtn.setAttribute("disabled", "true");
+                else nextBtn.removeAttribute("disabled");
+            }
+
+            function triggerAnimations() {
+                const currentSlideElement = slides[currentSlide];
+                const animatedElements = currentSlideElement.querySelectorAll('.fade-in');
+                animatedElements.forEach(el => {
+                    el.style.animation = 'none';
+                    void el.offsetWidth;
+                    el.style.animation = null; 
+                });
+            }
+
+            const isDarkOS = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDarkOS) enableDarkMode();
+
+            darkModeToggle.addEventListener("click", () => {
+                if (document.documentElement.classList.contains("dark")) disableDarkMode();
+                else enableDarkMode();
+            });
+
+            function enableDarkMode() {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+                darkModeToggle.textContent = '☀️';
+            }
+
+            function disableDarkMode() {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('dark');
+                darkModeToggle.textContent = '🌙';
+            }
+
+            let audioCtx = null;
+            function playSlideSound() {
+                try {
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    if(audioCtx.state === 'suspended') audioCtx.resume();
+                    
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); 
+                    oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.15); 
+                    
+                    gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                } catch(e) {}
+            }
+            
+            triggerAnimations();
+        });
+    </script>
+</body>
+</html>
